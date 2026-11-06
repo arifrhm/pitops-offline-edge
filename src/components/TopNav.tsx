@@ -37,6 +37,7 @@ export const TopNav: React.FC<TopNavProps> = ({ networkMode, onNetworkChange, de
       <div className="network-bar">
         <span className="network-label">Simulated Link:</span>
         <button
+          id="btn-tower-online"
           className={`net-btn ${networkMode === 'ONLINE' ? 'active online' : ''}`}
           onClick={() => onNetworkChange('ONLINE')}
         >
@@ -44,6 +45,7 @@ export const TopNav: React.FC<TopNavProps> = ({ networkMode, onNetworkChange, de
           Tower LTE (Online)
         </button>
         <button
+          id="btn-pit-offline"
           className={`net-btn ${networkMode === 'OFFLINE' ? 'active offline' : ''}`}
           onClick={() => onNetworkChange('OFFLINE')}
         >
@@ -51,6 +53,7 @@ export const TopNav: React.FC<TopNavProps> = ({ networkMode, onNetworkChange, de
           Deep Pit (Offline)
         </button>
         <button
+          id="btn-mesh-intermittent"
           className={`net-btn ${networkMode === 'INTERMITTENT' ? 'active intermittent' : ''}`}
           onClick={() => onNetworkChange('INTERMITTENT')}
         >

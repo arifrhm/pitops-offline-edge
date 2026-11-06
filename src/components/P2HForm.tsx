@@ -146,15 +146,15 @@ export const P2HForm: React.FC<P2HFormProps> = ({ deviceId, onSaved }) => {
       <div className="form-group">
         <span className="form-label">Quick Scenario Presets (1-Click Test):</span>
         <div className="preset-scenarios">
-          <button type="button" className="btn-secondary" onClick={applyPresetClean}>
+          <button id="btn-preset-clean" type="button" className="btn-secondary" onClick={applyPresetClean}>
             <Zap size={13} style={{ display: 'inline', marginRight: 4, color: 'var(--color-emerald)' }} />
             Clean Pass (DT-793-01)
           </button>
-          <button type="button" className="btn-secondary" style={{ borderColor: 'var(--color-rose)' }} onClick={applyPresetBrakeFail}>
+          <button id="btn-preset-brake" type="button" className="btn-secondary" style={{ borderColor: 'var(--color-rose)' }} onClick={applyPresetBrakeFail}>
             <AlertTriangle size={13} style={{ display: 'inline', marginRight: 4, color: 'var(--color-rose)' }} />
             Critical Brake Fail (DT-793-02)
           </button>
-          <button type="button" className="btn-secondary" style={{ borderColor: 'var(--color-amber)' }} onClick={applyPresetRollback}>
+          <button id="btn-preset-rollback" type="button" className="btn-secondary" style={{ borderColor: 'var(--color-amber)' }} onClick={applyPresetRollback}>
             <AlertTriangle size={13} style={{ display: 'inline', marginRight: 4, color: 'var(--color-amber)' }} />
             Rollback Anomaly (DT-730-05)
           </button>
@@ -262,7 +262,7 @@ export const P2HForm: React.FC<P2HFormProps> = ({ deviceId, onSaved }) => {
           />
         </div>
 
-        <button type="submit" className="btn-primary">
+        <button id="btn-submit-p2h" type="submit" className="btn-primary">
           💾 Save P2H Inspection (Offline Ready)
         </button>
       </form>

@@ -39,6 +39,7 @@ export const App: React.FC = () => {
         {/* Navigation Tabs */}
         <nav className="tab-nav">
           <button
+            id="tab-btn-inspector"
             className={`tab-btn ${activeTab === 'inspector' ? 'active' : ''}`}
             onClick={() => setActiveTab('inspector')}
           >
@@ -46,6 +47,7 @@ export const App: React.FC = () => {
             Pit Inspector Tablet (P2H Form)
           </button>
           <button
+            id="tab-btn-dispatch"
             className={`tab-btn ${activeTab === 'dispatch' ? 'active' : ''}`}
             onClick={() => setActiveTab('dispatch')}
           >
@@ -53,6 +55,7 @@ export const App: React.FC = () => {
             Central Dispatch & Telemetry Monitor
           </button>
           <button
+            id="tab-btn-architecture"
             className={`tab-btn ${activeTab === 'architecture' ? 'active' : ''}`}
             onClick={() => setActiveTab('architecture')}
           >
