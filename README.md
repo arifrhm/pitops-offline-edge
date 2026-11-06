@@ -89,6 +89,24 @@ PitOps Edge solves this with a multi-layered offline edge synchronization archit
 
 ---
 
+## 📸 Live Visual Walkthrough & Real Operations Demo
+
+> **Full Walkthrough Document:** See [**`WALKTHROUGH.md`**](WALKTHROUGH.md) for full high-resolution step-by-step screenshots generated via automated browser testing.
+
+### 1. Inspector Tablet — Deep Pit Offline Mode (Dexie.js Outbox Queue)
+When operators enter deep pit benches (-350m elevation), cellular/Wi-Fi drops. Inspections are saved locally in client **IndexedDB via Dexie.js**, cryptographically signed with **HMAC-SHA256**:
+
+![Offline Pre-Start Check with Dexie.js Outbox](walkthrough_screenshots/04_multiple_offline_inspections_in_outbox.png)
+
+### 2. Central Dispatch & Telemetry Monitor (Safety Interlock & Gzip Ingestion)
+Upon returning to surface network coverage (Fuel Bay / Workshop), the client automatically compresses the batch via **Gzip stream (66.6% bandwidth saved)**. The server validates signatures and interlocks defective units:
+- **DT-793-01:** Passed → `READY` for hauling.
+- **DT-793-02:** Service brake failure → Locked to **`GROUNDED (CRITICAL)`**, blocking FMS dispatch.
+
+![Central Dispatch Dashboard with Safety Interlock](walkthrough_screenshots/06_central_dispatch_interlock_dashboard.png)
+
+---
+
 ## 🧪 Interactive Walkthrough (How to Demo This)
 
 Open **http://localhost:3001** in your browser:
