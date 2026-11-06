@@ -1,8 +1,8 @@
 # PitOps Edge: Offline-First Mining Fleet Inspection & Dispatch Sync Platform
 
-[![Node.js](https://img.shields.io/badge/Node.js-v22%2B-339933?logo=node.js)](https://nodejs.org)
-[![Express](https://img.shields.io/badge/Express-4.21-black?logo=express)](https://expressjs.com)
-[![IndexedDB](https://img.shields.io/badge/Storage-IndexedDB%20%2B%20SQLite%20WAL-blue)](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API)
+[![React](https://img.shields.io/badge/Frontend-React%2019%20%2B%20Vite%208%20%2B%20TypeScript-61DAFB?logo=react)](https://react.dev)
+[![Dexie.js](https://img.shields.io/badge/Offline%20Storage-Dexie.js%20(IndexedDB)-00A389)](https://dexie.org)
+[![Fastify](https://img.shields.io/badge/Backend-Fastify%20v5%20%2B%20SQLite%20WAL-black?logo=fastify)](https://fastify.dev)
 [![Mining Compliance](https://img.shields.io/badge/Mining%20K3-Kepmen%20ESDM%201827-amber)](https://jdih.esdm.go.id)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
