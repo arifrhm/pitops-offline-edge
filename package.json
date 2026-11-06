@@ -1,0 +1,29 @@
+{
+  "name": "pitops-offline-edge",
+  "version": "1.0.0",
+  "description": "Offline-First Mining Heavy Equipment Inspection (P2H) & Dispatch Edge Sync Platform",
+  "main": "server/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js",
+    "simulate": "node scripts/simulate_pit_sync.js",
+    "seed": "node scripts/seed_fleet.js",
+    "test": "node --test tests/*.test.js"
+  },
+  "keywords": [
+    "mining",
+    "smart-mining",
+    "offline-first",
+    "fleet-management",
+    "p2h-inspection",
+    "edge-computing",
+    "iot",
+    "indexeddb"
+  ],
+  "author": "Arif Rahman",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}

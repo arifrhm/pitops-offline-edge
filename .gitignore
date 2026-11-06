@@ -1,0 +1,6 @@
+node_modules/
+pitops.db
+pitops.db-wal
+pitops.db-shm
+.DS_Store
+*.log

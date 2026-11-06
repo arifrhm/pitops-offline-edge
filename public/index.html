@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PitOps Edge | Offline-First Mining Fleet Inspection & Dispatch</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Top Navigation & Network Simulator Bar -->
+  <header class="top-nav">
+    <div class="brand">
+      <div class="brand-icon">⛏️</div>
+      <div>
+        <div class="brand-title">PitOps Edge</div>
+        <div style="font-size: 0.72rem; color: #94a3b8;">Mining Heavy Equipment P2H & Dispatch Sync</div>
+      </div>
+      <span class="brand-badge">Kepmen 1827 Compliant</span>
+    </div>
+
+    <!-- Network Simulation Switcher -->
+    <div class="network-bar">
+      <span class="network-label">Simulated Link:</span>
+      <button id="netOnlineBtn" class="net-btn active online">🟢 Tower LTE (Online)</button>
+      <button id="netOfflineBtn" class="net-btn offline">🔴 Deep Pit (Offline Blackspot)</button>
+      <button id="netIntermittentBtn" class="net-btn intermittent">🟡 Mesh Wi-Fi (Lossy 40%)</button>
+      <div id="queuePill" class="queue-pill">Outbox: 0 Pending</div>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- View Switcher Tabs -->
+    <nav class="tab-nav">
+      <button class="tab-btn active" data-tab="tab-inspector">📱 Pit Inspector Tablet (P2H Form)</button>
+      <button class="tab-btn" data-tab="tab-dispatch">🛰️ Central Dispatch & Telemetry Monitor</button>
+      <button class="tab-btn" data-tab="tab-architecture">🏗️ System Architecture & Mining Specs</button>
+    </nav>
+
+    <!-- TAB 1: Inspector Tablet Form -->
+    <section id="tab-inspector" class="view-panel active">
+      <div class="two-col-grid">
+        
+        <!-- Left Column: Form & Presets -->
+        <div class="card">
+          <div class="card-title">
+            <span>Pre-Start Safety Inspection (P2H)</span>
+            <span id="activeDeviceId" style="font-size: 0.75rem; color: var(--color-cyan); font-family: var(--font-mono);"></span>
+          </div>
+
+          <!-- Quick Test Scenario Presets -->
+          <div class="form-group">
+            <span class="form-label">Quick Scenario Presets (1-Click Test):</span>
+            <div class="preset-scenarios">
+              <button type="button" id="presetCleanPass" class="btn-secondary">⚡ Clean Pass (DT-793-01)</button>
+              <button type="button" id="presetCriticalBrake" class="btn-secondary" style="border-color: var(--color-rose);">🚨 Critical Brake Fail (DT-793-02)</button>
+              <button type="button" id="presetRollback" class="btn-secondary" style="border-color: var(--color-amber);">⚠️ Hour Meter Rollback (DT-730-05)</button>
+            </div>
+          </div>
+
+          <form id="p2hForm">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div class="form-group">
+                <label class="form-label" for="unitSelect">Select Heavy Unit</label>
+                <select id="unitSelect" class="form-select" required>
+                  <option value="">Loading cached fleet...</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="shiftSelect">Operating Shift</label>
+                <select id="shiftSelect" class="form-select">
+                  <option value="DAY">Day Shift (06:00 - 18:00)</option>
+                  <option value="NIGHT">Night Shift (18:00 - 06:00)</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div class="form-group">
+                <label class="form-label" for="inspectorIdInput">Inspector ID</label>
+                <input type="text" id="inspectorIdInput" class="form-input" value="OP-7742" required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="hourMeterInput">Hour Meter (SMU)</label>
+                <input type="number" step="0.1" id="hourMeterInput" class="form-input" placeholder="e.g. 14212.5" required>
+                <div id="prevHourNotice" style="font-size: 0.72rem; color: var(--text-muted); margin-top: 2px;"></div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Mining Safety Checklist (10 Points)</label>
+              <div class="checklist-grid" id="checklistContainer">
+                <!-- Dynamically populated checklist items -->
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="notesInput">Inspector Notes / Defect Description</label>
+              <textarea id="notesInput" class="form-textarea" rows="2" placeholder="Detail any leaks, unusual engine vibration, or physical damage..."></textarea>
+            </div>
+
+            <button type="submit" id="submitP2HBtn" class="btn-primary">
+              💾 Save P2H Inspection (Offline Ready)
+            </button>
+          </form>
+        </div>
+
+        <!-- Right Column: Edge Outbox & Synchronization Queue -->
+        <div class="card">
+          <div class="card-title">
+            <span>Edge Outbox Queue (IndexedDB)</span>
+            <button id="manualSyncBtn" class="btn-secondary" style="color: var(--color-amber);">🔄 Force Sync Now</button>
+          </div>
+          <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
+            Inspections recorded while offline in deep pits are persisted locally in browser IndexedDB. Upon network restoration, they are automatically signed (HMAC), compressed (Gzip), and batch-uploaded.
+          </p>
+
+          <div id="outboxList" style="display: flex; flex-direction: column; gap: 8px; max-height: 520px; overflow-y: auto;">
+            <!-- Pending items rendered here -->
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- TAB 2: Central Dispatch & Telemetry Monitor -->
+    <section id="tab-dispatch" class="view-panel">
+      <!-- KPI Row -->
+      <div class="kpi-row">
+        <div class="kpi-card total">
+          <div class="kpi-title">Total Active Fleet</div>
+          <div class="kpi-value" id="kpiTotal">0</div>
+        </div>
+        <div class="kpi-card ready">
+          <div class="kpi-title">Ready for Dispatch</div>
+          <div class="kpi-value" id="kpiReady" style="color: var(--color-emerald);">0</div>
+        </div>
+        <div class="kpi-card grounded">
+          <div class="kpi-title">Grounded (Safety Hold)</div>
+          <div class="kpi-value" id="kpiGrounded" style="color: var(--color-rose);">0</div>
+        </div>
+        <div class="kpi-card warning">
+          <div class="kpi-title">Maintenance Due</div>
+          <div class="kpi-value" id="kpiWarning" style="color: var(--color-amber);">0</div>
+        </div>
+      </div>
+
+      <div class="two-col-grid">
+        <!-- Fleet Status Table -->
+        <div class="card">
+          <div class="card-title">
+            <span>Live Heavy Fleet Dispatch Status</span>
+            <div style="display: flex; gap: 8px;">
+              <button id="refreshFleetBtn" class="btn-secondary">🔄 Refresh</button>
+              <button id="resetDemoBtn" class="btn-secondary" style="color: var(--color-rose);">🧹 Reset Demo</button>
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Unit Code</th>
+                  <th>Model / Capacity</th>
+                  <th>Status</th>
+                  <th>Hour Meter</th>
+                  <th>Current Location</th>
+                </tr>
+              </thead>
+              <tbody id="fleetTableBody">
+                <!-- Fleet rows rendered here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Ingestion & Sync Audit Log -->
+        <div class="card">
+          <div class="card-title">
+            <span>Sync Bandwidth & Cryptographic Audit Stream</span>
+            <span style="font-size: 0.72rem; color: var(--color-cyan);">Real-Time Ingestion</span>
+          </div>
+          <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px;">
+            Auditing compressed payload savings and tamper-proof HMAC-SHA256 signatures for ESDM compliance.
+          </p>
+          <div class="telemetry-stream" id="syncAuditStream">
+            <!-- Sync audit stream rendered here -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: System Architecture & Technical Specifications -->
+    <section id="tab-architecture" class="view-panel">
+      <div class="card" style="margin-bottom: 20px;">
+        <div class="card-title">Engineering Architecture: Offline-First Pit Edge Sync</div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; font-size: 0.88rem; line-height: 1.6;">
+          
+          <div style="background: #0f172a; padding: 16px; border-radius: 8px; border: 1px solid var(--border-color);">
+            <h4 style="color: var(--color-amber); margin-bottom: 8px;">1. Offline-First Resilience (IndexedDB)</h4>
+            <p style="color: var(--text-muted);">
+              Operates 100% offline at pit depths (>300m) without reliance on live HTTP connections. Forms, previous unit hour meters, and inspection submissions are cached in local client IndexedDB stores.
+            </p>
+          </div>
+
+          <div style="background: #0f172a; padding: 16px; border-radius: 8px; border: 1px solid var(--border-color);">
+            <h4 style="color: var(--color-cyan); margin-bottom: 8px;">2. Bandwidth Optimization (Gzip Stream)</h4>
+            <p style="color: var(--text-muted);">
+              Mining wireless mesh (Rajant / Cambium) and private LTE face throughput bottlenecks. Inspection batches are compressed client-side via native gzip compression streams, achieving <strong>65% - 80% payload size reduction</strong>.
+            </p>
+          </div>
+
+          <div style="background: #0f172a; padding: 16px; border-radius: 8px; border: 1px solid var(--border-color);">
+            <h4 style="color: var(--color-emerald); margin-bottom: 8px;">3. Cryptographic Audit Chain (HMAC-SHA256)</h4>
+            <p style="color: var(--text-muted);">
+              To meet strict KTT / ESDM mining safety audit standards, each inspection record is digitally signed with client-timestamped HMAC-SHA256, guaranteeing that safety forms cannot be backdated or falsified after an incident.
+            </p>
+          </div>
+
+          <div style="background: #0f172a; padding: 16px; border-radius: 8px; border: 1px solid var(--border-color);">
+            <h4 style="color: var(--color-rose); margin-bottom: 8px;">4. Hour Meter & Critical Fault Interlock</h4>
+            <p style="color: var(--text-muted);">
+              Automated anomaly detection identifies hour meter rollbacks and unrealistic jumps. Critical safety failures (brakes, steering, fire suppression) instantly interlock the unit status to <code>GROUNDED_SAFETY_HOLD</code>.
+            </p>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
