@@ -3,7 +3,7 @@ import zlib from 'node:zlib';
 import http from 'node:http';
 
 const HMAC_SECRET = process.env.PITOPS_HMAC_SECRET || 'PITOPS_MINING_EDGE_SECRET_KEY_2026';
-const SERVER_URL = process.env.SERVER_URL || 'http://localhost:3000';
+const SERVER_URL = process.env.SERVER_URL || 'http://localhost:3001';
 
 function computeHMAC(record) {
   const canonicalString = [

@@ -7,7 +7,7 @@ import { processSyncBatch, getSyncAuditLogs, getRecentInspections } from './sync
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 const app = express();
 
@@ -15,12 +15,11 @@ const app = express();
 initDatabase();
 seedFleetIfEmpty();
 
-// Raw body parser for handling gzipped binary payloads as well as standard JSON
-app.use('/api/v1/sync/batch', express.raw({ type: ['application/gzip', 'application/octet-stream', 'application/json'], limit: '10mb' }));
-app.use(express.json({ limit: '10mb' }));
-
 // Static frontend files
 app.use(express.static(path.join(__dirname, '..', 'public')));
+
+// Standard JSON parser for other endpoints
+app.use(express.json({ limit: '10mb' }));
 
 // Health check
 app.get('/api/v1/health', (req, res) => {
@@ -64,40 +63,42 @@ app.get('/api/v1/sync/audit-logs', (req, res) => {
   }
 });
 
-// Main Batch Sync Endpoint
-app.post('/api/v1/sync/batch', async (req, res) => {
-  try {
-    const isGzip = req.headers['content-encoding'] === 'gzip' || req.headers['content-type'] === 'application/gzip';
-    const edgeDeviceId = req.headers['x-edge-device-id'] || 'EDGE-UNKNOWN';
-    const batchId = req.headers['x-batch-id'] || `BATCH-${Date.now()}`;
-    const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+// Main Batch Sync Endpoint - Custom raw stream reader to handle raw wire gzip buffers accurately
+app.post('/api/v1/sync/batch', (req, res, next) => {
+  const chunks = [];
+  req.on('data', chunk => chunks.push(chunk));
+  req.on('end', async () => {
+    try {
+      const rawPayloadBuffer = Buffer.concat(chunks);
+      const isGzip = req.headers['content-encoding'] === 'gzip' ||
+                     req.headers['content-type'] === 'application/gzip' ||
+                     (rawPayloadBuffer.length >= 2 && rawPayloadBuffer[0] === 0x1f && rawPayloadBuffer[1] === 0x8b);
 
-    let rawPayloadBuffer;
-    if (Buffer.isBuffer(req.body)) {
-      rawPayloadBuffer = req.body;
-    } else {
-      rawPayloadBuffer = Buffer.from(JSON.stringify(req.body));
+      const edgeDeviceId = req.headers['x-edge-device-id'] || 'EDGE-UNKNOWN';
+      const batchId = req.headers['x-batch-id'] || `BATCH-${Date.now()}`;
+      const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+
+      const result = await processSyncBatch({
+        batchId,
+        edgeDeviceId,
+        rawPayloadBuffer,
+        isGzip,
+        clientIp
+      });
+
+      res.status(200).json({
+        success: true,
+        data: result
+      });
+    } catch (err) {
+      console.error('Sync batch error:', err);
+      res.status(400).json({
+        success: false,
+        error: err.message
+      });
     }
-
-    const result = await processSyncBatch({
-      batchId,
-      edgeDeviceId,
-      rawPayloadBuffer,
-      isGzip,
-      clientIp
-    });
-
-    res.status(200).json({
-      success: true,
-      data: result
-    });
-  } catch (err) {
-    console.error('Sync batch error:', err);
-    res.status(400).json({
-      success: false,
-      error: err.message
-    });
-  }
+  });
+  req.on('error', next);
 });
 
 // Reset database route for presentation & live demo replay

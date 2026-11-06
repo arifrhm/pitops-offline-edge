@@ -85,13 +85,13 @@ PitOps Edge solves this with a multi-layered offline edge synchronization archit
    ```
 
 3. **Open the Web Application:**
-   Navigate to: **[http://localhost:3000](http://localhost:3000)**
+   Navigate to: **[http://localhost:3001](http://localhost:3001)**
 
 ---
 
 ## 🧪 Interactive Walkthrough (How to Demo This)
 
-Open **http://localhost:3000** in your browser:
+Open **http://localhost:3001** in your browser:
 
 ### Step 1: Simulate the Deep Pit (Offline Mode)
 1. In the top navigation bar, click **🔴 Deep Pit (Offline Blackspot)**.
